@@ -142,6 +142,54 @@ class KnowledgeBase(object):
         """
         ####################################################
         # Student code goes here
+        
+        #if the inout is not a rule or a fact
+        if (not isinstance(fact_or_rule, Rule)) and (not isinstance(fact_or_rule, Fact)):
+            return "Input is neither a Rule nor a Fact"
+        #if the input is a rule but not in kb
+        if (isinstance(fact_or_rule, Rule)) and (not self._get_rule(fact_or_rule)):
+            return "Rule is not in the KB"
+        #if the input is a fact but not in kb
+        if (isinstance(fact_or_rule, Fact)) and (not self._get_fact(fact_or_rule)):
+            return "Fact is not in the KB"
+        #if the input is a rule or fact and is in kb
+        if (isinstance(fact_or_rule, Rule)) or (isinstance(fact_or_rule, Fact)):
+            return self.helper(fact_or_rule, 0)
+
+
+
+    def helper(self, fact_or_rule, counter):
+        
+        resultstring = ""
+        blank = " "
+        arrow = "->"
+        
+        if isinstance(fact_or_rule, Rule):
+            resultstring = resultstring + "rule:" + blank + "("
+            
+            for i in fact_or_rule.lhs:
+                resultstring = resultstring + i.__str__() + "," + blank
+    
+            resultstring = resultstring[:-2] + ")" + blank + arrow + blank + fact_or_rule.rhs.__str__()
+            factrule = self._get_rule(fact_or_rule)
+    
+        elif isinstance(fact_or_rule, Fact):
+            resultstring = resultstring + "fact:" + blank + fact_or_rule.statement.__str__()
+            factrule = self._get_fact(fact_or_rule)
+
+        resultstring = counter * blank + resultstring
+
+        if (not(factrule.asserted)):
+            resultstring = resultstring + "\n"
+        else:
+            resultstring = resultstring + blank + "ASSERTED\n"
+
+        for i in factrule.supported_by:
+            resultstring = resultstring + blank * (2 + counter) + "SUPPORTED BY\n"
+            resultstring = resultstring + self.helper(i[0], 4 + counter) + self.helper(i[1], 4 + counter)
+
+
+        return resultstring
 
 
 class InferenceEngine(object):
